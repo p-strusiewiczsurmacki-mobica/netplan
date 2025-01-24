@@ -2168,7 +2168,7 @@ handle_bridge_port_priority(NetplanParser* npp, yaml_node_t* node, const char* k
 }
 
 static gboolean
-handle_generic_vlans(NetplanParser* npp, yaml_node_t* node, GArray** entryptr, const void* data, GError** error)
+handle_generic_vlans(NetplanParser* npp, yaml_node_t* node, GArray** entryptr, GError** error)
 {
     static regex_t re;
     static gboolean re_inited = FALSE;
