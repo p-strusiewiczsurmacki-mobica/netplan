@@ -2235,9 +2235,9 @@ handle_generic_vlans(NetplanParser* npp, yaml_node_t* node, GArray** entryptr, G
 }
 
 static gboolean
-handle_bridge_vlans(yaml_document_t* doc, yaml_node_t* node, const void* data, GError** error)
+handle_bridge_vlans(NetplanParser* npp, yaml_node_t* node, const void* data, GError** error)
 {
-    return handle_generic_vlans(doc, node, &(cur_netdef->bridge_params.vlans), data, error);
+    return handle_generic_vlans(npp, node, &(npp->current.netdef), error);
 }
 
 static gboolean
