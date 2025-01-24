@@ -2241,7 +2241,7 @@ handle_bridge_vlans(NetplanParser* npp, yaml_node_t* node, GError** error)
 }
 
 static gboolean
-handle_bridge_port_vlans(NetplanParser* npp, yaml_node_t* node, const void* data, GError** error)
+handle_bridge_port_vlans(NetplanParser* npp, yaml_node_t* node, GError** error)
 {
     for (yaml_node_pair_t* entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
         yaml_node_t* key, *value;
@@ -2253,16 +2253,16 @@ handle_bridge_port_vlans(NetplanParser* npp, yaml_node_t* node, const void* data
         value = yaml_document_get_node(&npp->doc, entry->value);
         assert_type(npp, value, YAML_SEQUENCE_NODE);
 
-        component = g_hash_table_lookup(netdefs, scalar(key));
+        component = g_hash_table_lookup(npp->parsed_defs, scalar(key));
         if (!component) {
-            add_missing_node(key);
+            add_missing_node(npp, key);
         } else {
             ref_ptr = &(component->bridge_params.port_vlans);
             if (*ref_ptr)
-                return yaml_error(node, error, "%s: interface '%s' already has port vlans",
-                                  cur_netdef->id, scalar(key));
+                return yaml_error(npp, node, error, "%s: interface '%s' already has port vlans",
+                                  npp->current.netdef->id, scalar(key));
 
-            if (!handle_generic_vlans(doc, value, ref_ptr, data, error))
+            if (!handle_generic_vlans(npp, value, ref_ptr, error))
                 return FALSE;
         }
     }
@@ -2277,10 +2277,10 @@ static const mapping_entry_handler bridge_params_handlers[] = {
     {"max-age", YAML_SCALAR_NODE, {.generic=handle_netdef_str}, netdef_offset(bridge_params.max_age)},
     {"path-cost", YAML_MAPPING_NODE, {.map={.custom=handle_bridge_path_cost}}, netdef_offset(bridge_params.path_cost)},
     {"port-priority", YAML_MAPPING_NODE, {.map={.custom=handle_bridge_port_priority}}, netdef_offset(bridge_params.port_priority)},
-    {"port-vlans", YAML_MAPPING_NODE, handle_bridge_port_vlans, netdef_offset(bridge_params.port_vlans)},
+    {"port-vlans", YAML_MAPPING_NODE, {.map={.custom=handle_bridge_port_vlans}}, netdef_offset(bridge_params.port_vlans)},
     {"priority", YAML_SCALAR_NODE, {.generic=handle_netdef_guint}, netdef_offset(bridge_params.priority)},
     {"stp", YAML_SCALAR_NODE, {.generic=handle_netdef_bool}, netdef_offset(bridge_params.stp)},
-    {"vlans", YAML_SEQUENCE_NODE, handle_bridge_vlans},
+    {"vlans", YAML_SEQUENCE_NODE, {.map={.custom=handle_bridge_vlans}}}, netdef_offset(bridge_params.vlans),
     {NULL}
 };
 
