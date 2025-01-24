@@ -2180,7 +2180,7 @@ handle_generic_vlans(NetplanParser* npp, yaml_node_t* node, GArray** entryptr, G
 
     for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
         g_autofree char* vlan = NULL;
-        yaml_node_t *entry = yaml_document_get_node(&(npp->doc), *i);
+        yaml_node_t *entry = yaml_document_get_node(&npp->doc, *i);
         assert_type(npp, entry, YAML_SCALAR_NODE);
 
         vlan = g_strdup(scalar(entry));
@@ -2235,23 +2235,23 @@ handle_generic_vlans(NetplanParser* npp, yaml_node_t* node, GArray** entryptr, G
 }
 
 static gboolean
-handle_bridge_vlans(NetplanParser* npp, yaml_node_t* node, const void* data, GError** error)
+handle_bridge_vlans(NetplanParser* npp, yaml_node_t* node, GError** error)
 {
-    return handle_generic_vlans(npp, node, &(npp->current.netdef), error);
+    return handle_generic_vlans(npp, node, &(npp->current.netdef->bridge_params.vlans), error);
 }
 
 static gboolean
-handle_bridge_port_vlans(yaml_document_t* doc, yaml_node_t* node, const void* data, GError** error)
+handle_bridge_port_vlans(NetplanParser* npp, yaml_node_t* node, const void* data, GError** error)
 {
     for (yaml_node_pair_t* entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
         yaml_node_t* key, *value;
         NetplanNetDefinition *component;
         GArray** ref_ptr;
 
-        key = yaml_document_get_node(doc, entry->key);
-        assert_type(key, YAML_SCALAR_NODE);
-        value = yaml_document_get_node(doc, entry->value);
-        assert_type(value, YAML_SEQUENCE_NODE);
+        key = yaml_document_get_node(&npp->doc, entry->key);
+        assert_type(npp, key, YAML_SCALAR_NODE);
+        value = yaml_document_get_node(&npp->doc, entry->value);
+        assert_type(npp, value, YAML_SEQUENCE_NODE);
 
         component = g_hash_table_lookup(netdefs, scalar(key));
         if (!component) {
