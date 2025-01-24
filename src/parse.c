@@ -2277,10 +2277,10 @@ static const mapping_entry_handler bridge_params_handlers[] = {
     {"max-age", YAML_SCALAR_NODE, {.generic=handle_netdef_str}, netdef_offset(bridge_params.max_age)},
     {"path-cost", YAML_MAPPING_NODE, {.map={.custom=handle_bridge_path_cost}}, netdef_offset(bridge_params.path_cost)},
     {"port-priority", YAML_MAPPING_NODE, {.map={.custom=handle_bridge_port_priority}}, netdef_offset(bridge_params.port_priority)},
-    {"port-vlans", YAML_MAPPING_NODE, {.map={.custom=handle_bridge_port_vlans}}, netdef_offset(bridge_params.port_vlans)},
     {"priority", YAML_SCALAR_NODE, {.generic=handle_netdef_guint}, netdef_offset(bridge_params.priority)},
     {"stp", YAML_SCALAR_NODE, {.generic=handle_netdef_bool}, netdef_offset(bridge_params.stp)},
-    {"vlans", YAML_SEQUENCE_NODE, {.map={.custom=handle_bridge_vlans}}}, netdef_offset(bridge_params.vlans),
+    {"port-vlans", YAML_MAPPING_NODE, handle_bridge_port_vlans},
+    {"vlans", YAML_SEQUENCE_NODE, handle_bridge_vlans},
     {NULL}
 };
 
