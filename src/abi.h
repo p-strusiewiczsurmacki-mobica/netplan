@@ -22,7 +22,7 @@
 
 typedef int NetplanFlags;
 
-/* Those types are part of our ABI as they have been exposed in older versions */
+/* Those types are part of our ABI as they have been exposed in older versions TEST*/
 
 typedef enum {
     NETPLAN_OPTIONAL_IPV4_LL = 1<<0,
