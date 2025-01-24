@@ -2168,7 +2168,7 @@ handle_bridge_port_priority(NetplanParser* npp, yaml_node_t* node, const char* k
 }
 
 static gboolean
-handle_generic_vlans(yaml_document_t* doc, yaml_node_t* node, GArray** entryptr, const void* data, GError** error)
+handle_generic_vlans(NetplanParser* npp, yaml_node_t* node, GArray** entryptr, const void* data, GError** error)
 {
     static regex_t re;
     static gboolean re_inited = FALSE;
@@ -2180,8 +2180,8 @@ handle_generic_vlans(yaml_document_t* doc, yaml_node_t* node, GArray** entryptr,
 
     for (yaml_node_item_t *i = node->data.sequence.items.start; i < node->data.sequence.items.top; i++) {
         g_autofree char* vlan = NULL;
-        yaml_node_t *entry = yaml_document_get_node(doc, *i);
-        assert_type(entry, YAML_SCALAR_NODE);
+        yaml_node_t *entry = yaml_document_get_node(&(npp->doc), *i);
+        assert_type(npp, entry, YAML_SCALAR_NODE);
 
         vlan = g_strdup(scalar(entry));
 
@@ -2191,7 +2191,7 @@ handle_generic_vlans(yaml_document_t* doc, yaml_node_t* node, GArray** entryptr,
         if (regexec(&re, vlan, maxGroups, groups, 0) == 0) {
             NetplanBridgeVlan* data = g_new0(NetplanBridgeVlan, 1);
             for (unsigned g = 1; g < maxGroups; g = g+2) {
-                if (groups[g].rm_so == (size_t)-1)
+                if (groups[g].rm_so == (int)(size_t)-1)
                     continue; // Invalid group
 
                 char cursorCopy[strlen(vlan) + 1];
@@ -2200,17 +2200,17 @@ handle_generic_vlans(yaml_document_t* doc, yaml_node_t* node, GArray** entryptr,
                 guint v = 0;
                 switch (g) {
                     case 1:
-                        v = g_ascii_strtoull(cursorCopy + groups[g].rm_so, NULL, 10);
+                        v = (guint) g_ascii_strtoull(cursorCopy + groups[g].rm_so, NULL, 10);
                         if (v < 1 || v > 4094)
-                            return yaml_error(node, error, "malformed vlan vid '%u', must be in range [1..4094]", v);
+                            return yaml_error(npp, node, error, "malformed vlan vid '%u', must be in range [1..4094]", v);
                         data->vid = v;
                         break;
                     case 3:
-                        v = g_ascii_strtoull(cursorCopy + groups[g].rm_so, NULL, 10);
+                        v = (guint) g_ascii_strtoull(cursorCopy + groups[g].rm_so, NULL, 10);
                         if (v < 1 || v > 4094)
-                            return yaml_error(node, error, "malformed vlan vid '%u', must be in range [1..4094]", v);
+                            return yaml_error(npp, node, error, "malformed vlan vid '%u', must be in range [1..4094]", v);
                         else if (v <= data->vid)
-                            return yaml_error(node, error, "malformed vlan vid range '%s': %u > %u!", scalar(entry), data->vid, v);
+                            return yaml_error(npp, node, error, "malformed vlan vid range '%s': %u > %u!", scalar(entry), data->vid, v);
                         data->vid_to = v;
                         break;
                     case 5:
@@ -2228,7 +2228,7 @@ handle_generic_vlans(yaml_document_t* doc, yaml_node_t* node, GArray** entryptr,
             continue;
         }
 
-        return yaml_error(node, error, "malformed vlan '%s', must be: $vid [pvid] [untagged] [, $vid [pvid] [untagged]]", scalar(entry));
+        return yaml_error(npp, node, error, "malformed vlan '%s', must be: $vid [pvid] [untagged] [, $vid [pvid] [untagged]]", scalar(entry));
     }
 
     return TRUE;
@@ -2277,7 +2277,7 @@ static const mapping_entry_handler bridge_params_handlers[] = {
     {"max-age", YAML_SCALAR_NODE, {.generic=handle_netdef_str}, netdef_offset(bridge_params.max_age)},
     {"path-cost", YAML_MAPPING_NODE, {.map={.custom=handle_bridge_path_cost}}, netdef_offset(bridge_params.path_cost)},
     {"port-priority", YAML_MAPPING_NODE, {.map={.custom=handle_bridge_port_priority}}, netdef_offset(bridge_params.port_priority)},
-    {"port-vlans", YAML_MAPPING_NODE, handle_bridge_port_vlans},
+    {"port-vlans", YAML_MAPPING_NODE, handle_bridge_port_vlans, netdef_offset(bridge_params.port_vlans)},
     {"priority", YAML_SCALAR_NODE, {.generic=handle_netdef_guint}, netdef_offset(bridge_params.priority)},
     {"stp", YAML_SCALAR_NODE, {.generic=handle_netdef_bool}, netdef_offset(bridge_params.stp)},
     {"vlans", YAML_SEQUENCE_NODE, handle_bridge_vlans},
