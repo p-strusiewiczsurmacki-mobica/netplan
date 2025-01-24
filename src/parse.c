@@ -2235,13 +2235,13 @@ handle_generic_vlans(NetplanParser* npp, yaml_node_t* node, GArray** entryptr, G
 }
 
 static gboolean
-handle_bridge_vlans(NetplanParser* npp, yaml_node_t* node, GError** error)
+handle_bridge_vlans(NetplanParser* npp, yaml_node_t* node, const void *, GError** error)
 {
     return handle_generic_vlans(npp, node, &(npp->current.netdef->bridge_params.vlans), error);
 }
 
 static gboolean
-handle_bridge_port_vlans(NetplanParser* npp, yaml_node_t* node, GError** error)
+handle_bridge_port_vlans(NetplanParser* npp, yaml_node_t* node, const void*, GError** error)
 {
     for (yaml_node_pair_t* entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
         yaml_node_t* key, *value;
@@ -2279,8 +2279,8 @@ static const mapping_entry_handler bridge_params_handlers[] = {
     {"port-priority", YAML_MAPPING_NODE, {.map={.custom=handle_bridge_port_priority}}, netdef_offset(bridge_params.port_priority)},
     {"priority", YAML_SCALAR_NODE, {.generic=handle_netdef_guint}, netdef_offset(bridge_params.priority)},
     {"stp", YAML_SCALAR_NODE, {.generic=handle_netdef_bool}, netdef_offset(bridge_params.stp)},
-    {"port-vlans", YAML_MAPPING_NODE, handle_bridge_port_vlans},
-    {"vlans", YAML_SEQUENCE_NODE, handle_bridge_vlans},
+    {"port-vlans", YAML_MAPPING_NODE, {handle_bridge_port_vlans}, netdef_offset(bridge_params.port_vlans)},
+    {"vlans", YAML_SEQUENCE_NODE, {handle_bridge_vlans}, netdef_offset(bridge_params.vlans)},
     {NULL}
 };
 
