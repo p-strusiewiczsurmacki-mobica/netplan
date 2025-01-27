@@ -133,6 +133,7 @@ networkd
 nm
 passthrough
 programmatically
+pvid
 renderer
 reselection
 runtime
@@ -145,6 +146,7 @@ udev
 unconfigured
 unencrypted
 untagged
+vid
 vSwitch
 wpa
 wpasupplicant
