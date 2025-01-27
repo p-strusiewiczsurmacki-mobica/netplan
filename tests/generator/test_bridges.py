@@ -610,76 +610,76 @@ class TestNetplanYAMLv2(TestBase):
         stp: no
       dhcp4: true''')
 
-#     def test_bridge_vlans(self):
-#         self.generate('''network:
-#   version: 2
-#   renderer: NetworkManager
-#   ethernets:
-#     eno1: {}
-#     switchport: {}
-#   bridges:
-#     br0:
-#       interfaces: [eno1, switchport]
-#       parameters:
-#         vlans: [1-100 pvid untagged, 42 untagged, 13, 1 pvid, 2-100 pvid untagged]
-#         port-vlans:
-#           eno1: [99-999 pvid untagged, 1 untagged, 42 pvid]
-#           switchport: [4000-4094, 1 pvid, 13 untagged]''')
+    def test_bridge_vlans(self):
+        self.generate('''network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    eno1: {}
+    switchport: {}
+  bridges:
+    br0:
+      interfaces: [eno1, switchport]
+      parameters:
+        vlans: [1-100 pvid untagged, 42 untagged, 13, 1 pvid, 2-100 pvid untagged]
+        port-vlans:
+          eno1: [99-999 pvid untagged, 1 untagged, 42 pvid]
+          switchport: [4000-4094, 1 pvid, 13 untagged]''')
 
-#         self.assert_nm({'br0': '''[connection]
-# id=netplan-br0
-# type=bridge
-# interface-name=br0
+        self.assert_nm({'br0': '''[connection]
+id=netplan-br0
+type=bridge
+interface-name=br0
 
-# [bridge]
-# stp=true
-# vlan-filtering=true
-# vlans=1-100 pvid untagged, 42 untagged, 13, 1 pvid, 2-100 pvid untagged
+[bridge]
+stp=true
+vlan-filtering=true
+vlans=1-100 pvid untagged, 42 untagged, 13, 1 pvid, 2-100 pvid untagged
 
-# [ipv4]
-# method=link-local
+[ipv4]
+method=link-local
 
-# [ipv6]
-# method=ignore
-# ''',
-#                         'eno1': '''[connection]
-# id=netplan-eno1
-# type=ethernet
-# interface-name=eno1
-# slave-type=bridge # wokeignore:rule=slave
-# master=br0 # wokeignore:rule=master
+[ipv6]
+method=ignore
+''',
+                        'eno1': '''[connection]
+id=netplan-eno1
+type=ethernet
+interface-name=eno1
+slave-type=bridge # wokeignore:rule=slave
+master=br0 # wokeignore:rule=master
 
-# [bridge-port]
-# vlans=99-999 pvid untagged, 1 untagged, 42 pvid
+[bridge-port]
+vlans=99-999 pvid untagged, 1 untagged, 42 pvid
 
-# [ethernet]
-# wake-on-lan=0
+[ethernet]
+wake-on-lan=0
 
-# [ipv4]
-# method=link-local
+[ipv4]
+method=link-local
 
-# [ipv6]
-# method=ignore
-# ''',
-#                         'switchport': '''[connection]
-# id=netplan-switchport
-# type=ethernet
-# interface-name=switchport
-# slave-type=bridge # wokeignore:rule=slave
-# master=br0 # wokeignore:rule=master
+[ipv6]
+method=ignore
+''',
+                        'switchport': '''[connection]
+id=netplan-switchport
+type=ethernet
+interface-name=switchport
+slave-type=bridge # wokeignore:rule=slave
+master=br0 # wokeignore:rule=master
 
-# [bridge-port]
-# vlans=4000-4094, 1 pvid, 13 untagged
+[bridge-port]
+vlans=4000-4094, 1 pvid, 13 untagged
 
-# [ethernet]
-# wake-on-lan=0
+[ethernet]
+wake-on-lan=0
 
-# [ipv4]
-# method=link-local
+[ipv4]
+method=link-local
 
-# [ipv6]
-# method=ignore
-# '''})
+[ipv6]
+method=ignore
+'''})
 
 
 class TestConfigErrors(TestBase):
