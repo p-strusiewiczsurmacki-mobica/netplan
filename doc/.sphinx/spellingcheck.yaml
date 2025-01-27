@@ -29,3 +29,4 @@ matrix:
       - a.p-navigation__link
       - a.reference
       - article>section>h1
+      - pvid
