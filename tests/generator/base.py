@@ -185,7 +185,7 @@ class NetplanV2Normalizer():
             scalars_only = not any(list(map(lambda elem: (isinstance(elem, dict) or isinstance(elem, list)), data)))
 
             # sort sequence alphabetically
-            if scalars_only and all(type(x) == type(data[0]) for x in data):
+            if scalars_only and all(isinstance(x, type(data[0])) for x in data):
                 data.sort()
                 # remove duplicates (if needed)
                 unique = set(data)
