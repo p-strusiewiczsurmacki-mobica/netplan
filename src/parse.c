@@ -281,23 +281,23 @@ STATIC const mapping_entry_handler*
 get_handler(const mapping_entry_handler* handlers, const char* key)
 {
     for (unsigned i = 0; handlers[i].key != NULL; ++i) {
-        printf("get_handler %d\n", i);
+        // printf("get_handler %d\n", i);
         if (handlers == NULL) {
-            printf("handlers NULL\n");
+            // printf("handlers NULL\n");
         }
         else {
-            printf("handlers NOT NULL\n");
+            // printf("handlers NOT NULL\n");
         }
 
-        printf("TEST\n");
-        printf("key: %s\n", key);
+        // printf("TEST\n");
+        // printf("key: %s\n", key);
         if (g_strcmp0(handlers[i].key, key) == 0) {
-            printf("found handler for key: %s\n", handlers[i].key);
+            // printf("found handler for key: %s\n", handlers[i].key);
             return &handlers[i];
         }
             
     }
-    printf("handler not found for key: %s\n", key);
+    // printf("handler not found for key: %s\n", key);
     return NULL;
 }
 
@@ -325,51 +325,51 @@ process_mapping(NetplanParser* npp, yaml_node_t* node, const char* key_prefix, c
 
         g_assert(error == NULL || *error == NULL);
 
-        printf("yaml_document_get_node - key\n");
+        // printf("yaml_document_get_node - key\n");
         key = yaml_document_get_node(&npp->doc, entry->key);
-        printf("KEY: %s\n", scalar(key));
-        printf("yaml_document_get_node - value\n");
+        // printf("KEY: %s\n", scalar(key));
+        // printf("yaml_document_get_node - value\n");
         value = yaml_document_get_node(&npp->doc, entry->value);
-        printf("VALUE: %s\n", scalar(value));
+        // printf("VALUE: %s\n", scalar(value));
         assert_type(npp, key, YAML_SCALAR_NODE);
         if (npp->null_fields && key_prefix) {
             full_key = g_strdup_printf("%s\t%s", key_prefix, scalar(key));
-            printf("full key: %s\n", full_key);
+            // printf("full key: %s\n", full_key);
             if (g_hash_table_contains(npp->null_fields, full_key))
                 continue;
         }
-        printf("get_handler\n");
+        // printf("get_handler\n");
         h = get_handler(handlers, scalar(key));
         if (!h)
             return yaml_error(npp, key, error, "unknown key '%s'", scalar(key));
         assert_type(npp, value, h->type);
         if (out_values) {
-            printf("out_values - g_list_prepend\n");
+            // printf("out_values - g_list_prepend\n");
             *out_values = g_list_prepend(*out_values, g_strdup(scalar(key)));
         }
         if (h->type == YAML_MAPPING_NODE) {
-            printf("YAML_MAPPING_NODE\n");
+            // printf("YAML_MAPPING_NODE\n");
             if (h->map.custom) {
-                printf("map.custom\n");
+                // printf("map.custom\n");
                 res = h->map.custom(npp, value, full_key, h->data, error);
             } else {
-                printf("process_mapping\n");
+                // printf("process_mapping\n");
                 res = process_mapping(npp, value, full_key, h->map.handlers, NULL, error);
             }
         } else if (h->type == YAML_NO_NODE) {
-            printf("YAML_NO_NODE\n");
+            // printf("YAML_NO_NODE\n");
             res = h->variable(npp, value, full_key, h->data, error);
         } else {
-            printf("something else\n");
+            // printf("something else\n");
             res = h->generic(npp, value, h->data, error);
         }
         if (!res) {
-            printf("returning FALSE\n");
+            // printf("returning FALSE\n");
             return FALSE;
         }
     }
 
-    printf("returning TRUE\n");
+    // printf("returning TRUE\n");
     return TRUE;
 }
 
@@ -2268,14 +2268,14 @@ handle_generic_vlans(NetplanParser* npp, yaml_node_t* node, GArray** entryptr, G
 static gboolean
 handle_bridge_vlans(NetplanParser* npp, yaml_node_t* node, const void *, GError** error)
 {
-    printf("handle_bridge_vlans");
+    // printf("handle_bridge_vlans");
     return handle_generic_vlans(npp, node, &(npp->current.netdef->bridge_params.vlans), error);
 }
 
 static gboolean
 handle_bridge_port_vlans(NetplanParser* npp, yaml_node_t* node, const char*, const void*, GError** error)
 {
-    printf("handle_bridge_port_vlans\n");
+    // printf("handle_bridge_port_vlans\n");
     for (yaml_node_pair_t* entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
         yaml_node_t* key, *value;
         NetplanNetDefinition *component;
@@ -3437,7 +3437,7 @@ node_is_nulled_out(yaml_document_t* doc, yaml_node_t* node, const char* key_pref
 STATIC gboolean
 handle_network_type(NetplanParser* npp, yaml_node_t* node, const char* key_prefix, const void* data, GError** error)
 {
-    printf("handle_network_type\n");
+    // printf("handle_network_type\n");
     for (yaml_node_pair_t* entry = node->data.mapping.pairs.start; entry < node->data.mapping.pairs.top; entry++) {
         yaml_node_t* key, *value;
         const mapping_entry_handler* handlers;
@@ -3693,7 +3693,7 @@ process_document(NetplanParser* npp, GError** error)
     guint still_missing;
 
     g_assert(npp->missing_id == NULL);
-    printf("g_hash_table_new_full\n");
+    // printf("g_hash_table_new_full\n");
     npp->missing_id = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_free);
 
     do {
@@ -3704,10 +3704,10 @@ process_document(NetplanParser* npp, GError** error)
 
         g_clear_error(error);
 
-        printf("process_mapping\n");
+        // printf("process_mapping\n");
         ret = process_mapping(npp, yaml_document_get_root_node(&npp->doc), "", root_handlers, NULL, error);
 
-        printf("g_hash_table_size\n");
+        // printf("g_hash_table_size\n");
         still_missing = g_hash_table_size(npp->missing_id);
 
         if (still_missing > 0 && npp->missing_ids_found == previously_found)
@@ -3718,11 +3718,11 @@ process_document(NetplanParser* npp, GError** error)
     if (error && *error)
         goto cleanup;
 
-    printf("process_missing_ids\n");
+    // printf("process_missing_ids\n");
     process_missing_ids(npp, error);
 
     if (g_hash_table_size(npp->missing_id) > 0) {
-        printf("g_hash_table_size > 0\n");
+        // printf("g_hash_table_size > 0\n");
         GHashTableIter iter;
         gpointer key, value;
         NetplanMissingNode *missing;
@@ -3731,9 +3731,9 @@ process_document(NetplanParser* npp, GError** error)
 
         /* Get the first missing identifier we can get from our list, to
          * approximate early failure and give the user a meaningful error. */
-        printf("g_hash_table_iter_init\n");
+        // printf("g_hash_table_iter_init\n");
         g_hash_table_iter_init (&iter, npp->missing_id);
-        printf("g_hash_table_iter_next\n");
+        // printf("g_hash_table_iter_next\n");
         g_hash_table_iter_next (&iter, &key, &value);
         missing = (NetplanMissingNode*) value;
 
@@ -3743,7 +3743,7 @@ process_document(NetplanParser* npp, GError** error)
     }
 
 cleanup:
-    printf("g_hash_table_iter_next\n");
+    // printf("g_hash_table_iter_next\n");
     g_hash_table_destroy(npp->missing_id);
     npp->missing_id = NULL;
     return ret;
@@ -3755,32 +3755,32 @@ _netplan_parser_load_single_file(NetplanParser* npp, const char *opt_filepath, y
     int ret = FALSE;
 
     if (opt_filepath) {
-        printf("opt_filepath: %s\n", opt_filepath);
+        // printf("opt_filepath: %s\n", opt_filepath);
         char* source = g_strdup(opt_filepath);
         if (!npp->sources)
             npp->sources = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-        printf("g_hash_table_add\n");
+        // printf("g_hash_table_add\n");
         g_hash_table_add(npp->sources, source);
     }
 
     /* empty file? */
-    printf("yaml_document_get_root_node\n");
+    // printf("yaml_document_get_root_node\n");
     if (yaml_document_get_root_node(doc) == NULL)
         return TRUE;
 
     g_assert(npp->ids_in_file == NULL);
-    printf("g_hash_table_new\n");
+    // printf("g_hash_table_new\n");
     npp->ids_in_file = g_hash_table_new(g_str_hash, NULL);
 
     npp->current.filepath = opt_filepath? g_strdup(opt_filepath) : NULL;
-    printf("process_document\n");
+    // printf("process_document\n");
     ret = process_document(npp, error);
     g_free((void *)npp->current.filepath);
     npp->current.filepath = NULL;
 
-    printf("yaml_document_delete\n");
+    // printf("yaml_document_delete\n");
     yaml_document_delete(doc);
-    printf("g_hash_table_destroy\n");
+    // printf("g_hash_table_destroy\n");
     g_hash_table_destroy(npp->ids_in_file);
     npp->ids_in_file = NULL;
 
@@ -3819,11 +3819,11 @@ netplan_parser_load_yaml(NetplanParser* npp, const char* filename, GError** erro
         g_warning("Permissions for %s are too open. Netplan configuration "
                   "should NOT be accessible by others.", filename);
 
-    printf("load_yaml\n");
+    // printf("load_yaml\n");
     if (!load_yaml(filename, doc, error))
         return FALSE;
 
-    printf("_netplan_parser_load_single_file\n");
+    // printf("_netplan_parser_load_single_file\n");
     return _netplan_parser_load_single_file(npp, filename, doc, error);
 }
 
