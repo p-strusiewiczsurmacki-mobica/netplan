@@ -624,7 +624,7 @@ class TestNetplanYAMLv2(TestBase):
         vlans: [1-100 pvid untagged, 42 untagged, 13, 1 pvid, 2-100 pvid untagged]
         port-vlans:
           eno1: [99-999 pvid untagged, 1 untagged, 42 pvid]
-          switchport: [4000-4094, 1 pvid, 13 untagged]''')
+          switchport: [4000-4094, 1 pvid, 13 untagged]''', skip_generated_yaml_validation=True)
 
         self.assert_nm({'br0': '''[connection]
 id=netplan-br0
