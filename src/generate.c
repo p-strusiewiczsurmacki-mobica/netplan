@@ -204,7 +204,6 @@ exit_find:
 int main(int argc, char** argv)
 {
     g_log_set_handler(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG,  g_log_default_handler, NULL);
-    // printf("StARTED\n");
     NetplanError* error = NULL;
     GOptionContext* opt_context;
     /* are we being called as systemd generator? */
@@ -255,24 +254,19 @@ int main(int argc, char** argv)
         // LCOV_EXCL_STOP
     }
 
-    // printf("Creating new parser\n");
     npp = netplan_parser_new();
     if (ignore_errors || called_as_generator)
         netplan_parser_set_flags(npp, NETPLAN_PARSER_IGNORE_ERRORS, &error);
 
     /* Read all input files */
-    // printf("Reading input files\n");
     if (files && !called_as_generator) {
-        // printf("If\n");
         for (gchar** f = files; f && *f; ++f) {
             CHECK_CALL(netplan_parser_load_yaml(npp, *f, &error), ignore_errors);
         }
     } else {
-        // printf("ELSE\n");
         CHECK_CALL(netplan_parser_load_yaml_hierarchy(npp, rootdir, &error), ignore_errors);
     }
 
-    // printf("New netplan state\n");
     np_state = netplan_state_new();
     CHECK_CALL(netplan_state_import_parser_results(np_state, npp, &error), ignore_errors);
 
@@ -285,7 +279,6 @@ int main(int argc, char** argv)
         goto cleanup;
     }
 
-    // printf("Cleanup generated config from previous run\n");
     /* Clean up generated config from previous runs */
     _netplan_networkd_cleanup(rootdir);
     _netplan_nm_cleanup(rootdir);
@@ -293,7 +286,6 @@ int main(int argc, char** argv)
     _netplan_sriov_cleanup(rootdir);
 
     /* Generate backend specific configuration files from merged data. */
-    // printf("Start generation?\n");
     CHECK_CALL(netplan_state_finish_ovs_write(np_state, rootdir, &error), ignore_errors); // OVS cleanup unit is always written
     if (np_state->netdefs) {
         g_debug("Generating output files..");

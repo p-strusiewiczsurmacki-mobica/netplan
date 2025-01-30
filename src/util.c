@@ -698,21 +698,18 @@ netplan_parser_load_yaml_hierarchy(NetplanParser* npp, const char* rootdir, GErr
      * To do that, we put all found files in a hash table, then sort it by
      * file name, and add the entries from /run after the ones from /etc
      * and those after the ones from /lib. */
-    // printf("_netplan_find_yaml_glob\n");
     if (_netplan_find_yaml_glob(rootdir, &gl) != 0)
         return FALSE; // LCOV_EXCL_LINE
     /* keys are strdup()ed, free them; values point into the glob_t, don't free them */
     g_autoptr(GHashTable) configs = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     g_autoptr(GList) config_keys = NULL;
 
-    // printf("g_hash_table_insert\n");
     for (size_t i = 0; i < gl.gl_pathc; ++i)
         g_hash_table_insert(configs, g_path_get_basename(gl.gl_pathv[i]), gl.gl_pathv[i]);
 
     config_keys = g_list_sort(g_hash_table_get_keys(configs), (GCompareFunc) strcmp);
 
     for (GList* i = config_keys; i != NULL; i = i->next) {
-        // printf("netplan_parser_load_yaml\n");
         if (!netplan_parser_load_yaml(npp, g_hash_table_lookup(configs, i->data), error)) {
             if (npp->flags & NETPLAN_PARSER_IGNORE_ERRORS) {
                 if (error && *error) {
@@ -726,7 +723,6 @@ netplan_parser_load_yaml_hierarchy(NetplanParser* npp, const char* rootdir, GErr
             return FALSE;
         }
     }
-    // printf("globfree\n");
     globfree(&gl);
     return TRUE;
 }
