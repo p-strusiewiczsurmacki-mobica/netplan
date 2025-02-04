@@ -345,6 +345,7 @@ struct netplan_net_definition {
         GArray* vlans;
         GArray* port_vlans;
         gboolean vlan_filtering;
+        char* vlan_default_pvid;
     } bridge_params;
     gboolean custom_bridging;
 
